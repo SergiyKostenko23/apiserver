@@ -15,6 +15,7 @@ class UserManager(BaseUserManager):
             email=self.normalize_email(email),
         )
         u.tipo_user=1
+        u.criado_por=1
         u.set_password(password)
         u.save(using=self._db)
         return u
@@ -38,7 +39,7 @@ class User(AbstractBaseUser):
     user=models.CharField(max_length=50, unique=True)
     nome=models.CharField(max_length=100)
     email=models.EmailField(max_length=100, unique=True)
-    data_registo=models.DateField(default=timezone.now)
+    data_registo=models.DateTimeField(default=timezone.now)
     password=models.CharField(max_length=30)
     tipo_user=models.IntegerField(default=1)
     criado_por=models.IntegerField(default=None)
