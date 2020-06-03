@@ -14,7 +14,7 @@ class CustomAuthToken(ObtainAuthToken):
                                            context={'request': request})
         serializer.is_valid(raise_exception=True)
         user = serializer.validated_data['user']
-        token, created = Token.objects.get_or_create(user=user)
+        token = Token.objects.get_or_create(user=user)
         return Response({
             'token': token.key,
             'user': user,
@@ -47,3 +47,12 @@ class UserViewSet(viewsets.ModelViewSet):
         serializer.is_valid(raise_exception=True)
         serializer.save()
         return Response(data=serializer.data, status=status.HTTP_200_OK)
+
+    def list(self, request):
+        # Note the use of `get_queryset()` instead of `self.queryset`
+        if request.data.filter(id=request.data["id"])!=None:
+            queryset = User.objects.filter(id=request.data["id"])
+        else:
+            queryset = User.objects.all()
+        serializer = UserSerializer(queryset, many=True)
+        return Response(serializer.data)
