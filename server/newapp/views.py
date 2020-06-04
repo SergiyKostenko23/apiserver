@@ -8,28 +8,24 @@ from rest_framework.authtoken.views import ObtainAuthToken
 from rest_framework.authtoken.models import Token
 
 # Create your views here.
-class CustomAuthToken(ObtainAuthToken):
-    def post(self, request, *args, **kwargs):
-        serializer = self.serializer_class(data=request.data,
-                                           context={'request': request})
-        serializer.is_valid(raise_exception=True)
-        user = serializer.validated_data['user']
-        token = Token.objects.get_or_create(user=user)
-        return Response({
-            'token': token.key,
-            'user': user,
-            'nome': user.nome,
-            'email': user.email,
-            'data_registo': user.data_registo,
-            'tipo_user': user.tipo_user,
-            'criado_por': user.criado_por
-        })
+#class CustomAuthToken(ObtainAuthToken):
+    #def post(self, request, *args, **kwargs):
+        #serializer = self.serializer_class(data=request.data,
+                                           #context={'request': request})
+        #serializer.is_valid(raise_exception=True)
+        #user = serializer.validated_data['username']
+        #token, created = Token.objects.get_or_create(user=user)
+        #return Response({
+            #'token': token.key,
+            #'user': user,
+            #'email': user.email,
+        #})
 
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     authentication_classes = (TokenAuthentication,)
-    #permission_classes = (IsAuthenticated,)
+    permission_classes = (IsAuthenticated,)
     def edit(self, request):
         user_to_update = User.objects.get(id=request.data["id"])
         serializer = UserSerializer(user_to_update, request.data, partial=True)
@@ -40,7 +36,7 @@ class UserViewSet(viewsets.ModelViewSet):
     def destroy(self, request):
         user_to_destroy = User.objects.get(id=request.data["id"])
         user_to_destroy.delete()
-        return Response(status=status.HTTP_200_OK)
+        return Response("Utilizador eliminado com successo.", status=status.HTTP_200_OK)
 
     def create(self, request):
         serializer = UserSerializer(data=request.data)
@@ -50,7 +46,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
     def list(self, request):
         # Note the use of `get_queryset()` instead of `self.queryset`
-        if request.data.filter(id=request.data["id"])!=None:
+        if "id" in request.data:
             queryset = User.objects.filter(id=request.data["id"])
         else:
             queryset = User.objects.all()
