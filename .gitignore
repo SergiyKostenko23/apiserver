@@ -1,1 +1,8 @@
-/venv/
+# Environments 
+
+env/ 
+
+/.gitignore/
+
+*/_pycache_/
+ 
