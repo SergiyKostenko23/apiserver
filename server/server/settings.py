@@ -12,11 +12,13 @@ https://docs.djangoproject.com/en/3.0/ref/settings/
 
 import os
 
+#BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 AUTH_USER_MODEL = 'newapp.User'
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-
+MEDIA_URL = ''
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/3.0/howto/deployment/checklist/
@@ -28,6 +30,7 @@ SECRET_KEY = 'eb114_y4n@h-lg$_3g28q1jw^uazy1-l(je0-1a41l=65kxsi1'
 DEBUG = True
 
 ALLOWED_HOSTS = ['*']
+MAX_UPLOAD_SIZE = "20971520"
 
 
 # Application definition
@@ -43,11 +46,14 @@ INSTALLED_APPS = [
     'newapp',
     'django_extensions',
     'rest_framework.authtoken',
+    'magic',
+    'oauth2_provider',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -60,7 +66,9 @@ ROOT_URLCONF = 'server.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [
+            "templates"
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -109,9 +117,15 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/3.0/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'pt'
 
-TIME_ZONE = 'UTC'
+LOCAL_PATHS =  [
+    os.path.join(BASE_DIR, 'locale'),
+    ]
+
+TIME_ZONE = 'Etc/GMT-1'
+
+DATE_FORMAT = "d-m-Y"
 
 USE_I18N = True
 
@@ -125,11 +139,27 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+OAUTH2_PROVIDER = {
+    # this is the list of available scopes
+    'SCOPES': {'read': 'Read scope', 'write': 'Write scope'}
+}
+
+CLIENT_ID = '228872530962-85i4ofld2g57invgqsnamfp1mofuttcd.apps.googleusercontent.com'
+
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework.authentication.BasicAuthentication',
+        'oauth2_provider.contrib.rest_framework.OAuth2Authentication',
+        'rest_framework.authentication.TokenAuthentication',
     )
+}
+
+FILE_UPLOAD_HANDLERS = [
+'django.core.files.uploadhandler.TemporaryFileUploadHandler',
+]
+
+REST_FRAMEWORK = {
+    'UNICODE_JSON': False
 }

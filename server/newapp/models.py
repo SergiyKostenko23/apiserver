@@ -1,53 +1,30 @@
+import os
+
 from django.db import models
 from django.utils import timezone
-from django.contrib.auth.models import AbstractBaseUser, BaseUserManager
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
+from django.core.files.storage import FileSystemStorage
+from django.conf import settings
+from django.contrib.auth.models import PermissionsMixin
 
-# Create your models here.
-class UserManager(BaseUserManager):
-    def create_user(self, email, password, user, nome, criado_por, data_registo=None, tipo_user=None):
-        """
-        Creates and saves a User with the given email and password.
-        """
-        if not email:
-            raise ValueError('Users must have an email address')
+from .validators import valida_img
 
-        u = self.model(
-            email=self.normalize_email(email),
-            user=user,
-            nome=nome,
-            criado_por=criado_por,
-        )
-        u.tipo_user=1
-        u.set_password(password)
-        u.save(using=self._db)
-        return u
+root_img = os.path.normpath(os.path.join(settings.MEDIA_ROOT, "img/"))
+root_img_default = os.path.normpath(os.path.join(settings.MEDIA_ROOT, "img/placeholder.jpg"))
 
-    def create_superuser(self, email, password, user, nome, criado_por):
-        """
-        Creates and saves a superuser with the given email and password.
-        """
-        u = self.create_user(
-            email,
-            user=user,
-            nome=nome,
-            password=password,
-            criado_por=criado_por,
-        )
-        user.tpo_user=2
-        u.set_password(password)
-        user.save(using=self._db)
-        return user
-
-class User(AbstractBaseUser):
-    objects = UserManager()
-    REQUIRED_FIELDS = ('email', 'password', 'tipo_user', 'criado_por')
-    USERNAME_FIELD = 'user'
-    user=models.CharField(max_length=50, unique=True)
-    nome=models.CharField(max_length=100)
+#Model de users
+class User(AbstractBaseUser, PermissionsMixin):
+    objects = BaseUserManager()
+    USERNAME_FIELD = 'email'
+    user=models.CharField(max_length=50, unique=True, null=True, blank=True)
+    nome=models.CharField(max_length=100, null=True, blank=True)
     email=models.EmailField(max_length=100, unique=True)
     data_registo=models.DateTimeField(default=timezone.now)
-    password=models.CharField(max_length=30)
-    tipo_user=models.IntegerField(default=1)
-    criado_por=models.IntegerField(default=None)
-    def __str__(self):
-        return self.user
+    password=models.CharField(max_length=30, null=True, blank=True)
+    tipo_user=models.CharField(max_length=30, default="base")
+    photo=models.ImageField(upload_to=root_img, default=root_img_default, validators=[valida_img])
+    criado_por=models.IntegerField(null=True)
+    is_staff = models.BooleanField(default=False)
+    
+    # def __repr__(self):
+    #     return self.user
