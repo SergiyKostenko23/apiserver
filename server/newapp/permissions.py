@@ -6,7 +6,6 @@ from .views import User
 class CreateUserPermssion(BasePermission):
     def has_permission(self, request, view):
         user = User.objects.filter(email=request.user)
-        print(request.user)
         metodo = request.method
         if metodo != SAFE_METHODS and user[0].tipo_user == "superuser":
             return True
